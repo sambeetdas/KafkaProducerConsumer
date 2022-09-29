@@ -20,16 +20,24 @@ namespace Kafka.Manager.Implements
         }
         public async Task<CustomerModel> ProduceCustomer(string topic, CustomerModel customer)
         {
-            var config = new ProducerConfig()
+            try
             {
-                BootstrapServers = _configuration["Kafka:BootStrapServer"],
-                Acks = Acks.None
-            };
+                var config = new ProducerConfig()
+                {
+                    BootstrapServers = _configuration["Kafka:BootStrapServer"],
+                    Acks = Acks.None
+                };
 
-            using (var producer = new ProducerBuilder<Null, string>(config).Build())
-            {
-                await producer.ProduceAsync(topic, new Message<Null, string> { Value = JsonSerializer.Serialize<CustomerModel>(customer) });
+                using (var producer = new ProducerBuilder<Null, string>(config).Build())
+                {
+                    await producer.ProduceAsync(topic, new Message<Null, string> { Value = JsonSerializer.Serialize<CustomerModel>(customer) });
+                }
             }
+            catch (Exception)
+            {
+                throw;
+            }
+            
 
             return customer;
         }
