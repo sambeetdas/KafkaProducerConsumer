@@ -13,15 +13,16 @@ namespace Kafka.Manager.Implements
 {
     public class ProducerHandler : IProducerContract
     {
-        public IConfiguration _configuration { get; set; }
+        private IConfiguration _configuration { get; set; }
         public ProducerHandler(IConfiguration configuration)
         {
             _configuration = configuration;
         }
-        public async Task<CustomerModel> ProduceCustomer(string topic, CustomerModel customer)
+        public async Task<CustomerModel> ProduceCustomer(CustomerModel customer)
         {
             try
             {
+                customer.Topic = _configuration["Kafka:Topic"];
                 var config = new ProducerConfig()
                 {
                     BootstrapServers = _configuration["Kafka:BootStrapServer"],
@@ -30,7 +31,7 @@ namespace Kafka.Manager.Implements
 
                 using (var producer = new ProducerBuilder<Null, string>(config).Build())
                 {
-                    await producer.ProduceAsync(topic, new Message<Null, string> { Value = JsonSerializer.Serialize<CustomerModel>(customer) });
+                    await producer.ProduceAsync(customer.Topic, new Message<Null, string> { Value = JsonSerializer.Serialize<CustomerModel>(customer) });
                 }
             }
             catch (Exception)
@@ -38,7 +39,6 @@ namespace Kafka.Manager.Implements
                 throw;
             }
             
-
             return customer;
         }
     }

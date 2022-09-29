@@ -9,6 +9,6 @@ namespace Kafka.Manager.Contracts
 {
     public interface IProducerContract
     {
-        Task<CustomerModel> ProduceCustomer(string topic, CustomerModel customer);
+        Task<CustomerModel> ProduceCustomer(CustomerModel customer);
     }
 }

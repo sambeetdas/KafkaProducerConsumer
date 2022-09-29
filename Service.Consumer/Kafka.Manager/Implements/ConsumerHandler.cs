@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using Entity.Manager.Customer;
+using Kafka.Manager.Contracts;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -10,20 +11,23 @@ using System.Threading.Tasks;
 
 namespace Kafka.Manager.Implements
 {   
-    public class ConsumerHandler
+    public class ConsumerHandler : IConsumerContract
     {
+        private IConfiguration _configuration { get; set; }
 
-        public async Task<CustomerModel> ConsumeCustomer(string topic)
+        public ConsumerHandler(IConfiguration configuration)
         {
-
-            //IConfiguration configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json")
-            //                .Build();
-
+            _configuration = configuration;
+        }
+        public async Task<CustomerModel> ConsumeCustomer()
+        {
+            string topic = "customer-topic"; //_configuration["Kafka:Topic"]
+            string groupId = topic + "-consumer-group";
+            string bootstrapServer = "localhost:9092"; //_configuration["Kafka:BootStrapServer"]
             var config = new ConsumerConfig()
             {
-                GroupId = topic + "-consumer-group",
-                //BootstrapServers = configuration["Kafka:BootStrapServer"]
-                BootstrapServers = "localhost:9092",
+                GroupId = groupId,
+                BootstrapServers = bootstrapServer,
                 AutoOffsetReset = AutoOffsetReset.Latest
             };
 

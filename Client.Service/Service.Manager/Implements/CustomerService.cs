@@ -14,7 +14,7 @@ namespace Service.Manager.Implements
         }
         public async Task<CustomerModel> ProcessCustomer(CustomerModel customer)
         {
-            return await _producer.ProduceCustomer("customer-topic", customer);
+            return await _producer.ProduceCustomer(customer);
         }
     }
 }
