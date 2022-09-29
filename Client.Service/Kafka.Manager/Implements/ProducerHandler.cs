@@ -22,7 +22,8 @@ namespace Kafka.Manager.Implements
         {
             var config = new ProducerConfig()
             {
-                BootstrapServers = _configuration["Kafka:BootStrapServer"]
+                BootstrapServers = _configuration["Kafka:BootStrapServer"],
+                Acks = Acks.None
             };
 
             using (var producer = new ProducerBuilder<Null, string>(config).Build())

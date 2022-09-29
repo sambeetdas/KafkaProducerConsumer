@@ -21,18 +21,31 @@ namespace Kafka.Manager.Implements
 
             var config = new ConsumerConfig()
             {
+                GroupId = topic + "-consumer-group",
                 //BootstrapServers = configuration["Kafka:BootStrapServer"]
-                BootstrapServers = "localhost:9092"
+                BootstrapServers = "localhost:9092",
+                AutoOffsetReset = AutoOffsetReset.Latest
             };
 
-            dynamic cr;
-            using (var consumer = new ConsumerBuilder<Null, string>(config).Build())
+            dynamic customerMessage = null;
+            try
             {
-                consumer.Subscribe(topic);
-                cr = consumer.Consume();                
+                using (var consumer = new ConsumerBuilder<Null, string>(config).Build())
+                {
+                    consumer.Subscribe(topic);
+                    var cr = consumer.Consume();
+                    if (cr.Message != null)
+                        customerMessage = JsonSerializer.Deserialize<CustomerModel>(cr.Message.Value);
+
+                }
+                
             }
-            var customer = JsonSerializer.Deserialize<CustomerModel>(cr.Message.Value);
-            return customer;
+            catch (Exception ex)
+            {
+                throw;
+            }
+            
+            return customerMessage;
         }
     }
 }

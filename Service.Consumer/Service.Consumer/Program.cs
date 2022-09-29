@@ -1,7 +1,18 @@
 ﻿using Kafka.Manager.Implements;
 
 ConsumerHandler obj = new ConsumerHandler();
-while (true)
+try
 {
-    var result = obj.ConsumeCustomer("customer_topic");
+    while (true)
+    {
+        var message = obj.ConsumeCustomer("customer-topic");
+        if (message != null && message.Result != null)
+        {
+            Console.WriteLine(message.Result.Name);
+        }
+    }
+}
+catch (Exception)
+{
+	throw;
 }
