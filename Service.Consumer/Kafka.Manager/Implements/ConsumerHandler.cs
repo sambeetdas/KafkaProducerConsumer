@@ -19,7 +19,7 @@ namespace Kafka.Manager.Implements
         {
             _configuration = configuration;
         }
-        public async Task<CustomerModel> ConsumeCustomer()
+        public async Task ConsumeCustomer(CancellationToken stoppingToken)
         {
             string topic = "customer-topic"; //_configuration["Kafka:Topic"]
             string groupId = topic + "-consumer-group";
@@ -31,25 +31,36 @@ namespace Kafka.Manager.Implements
                 AutoOffsetReset = AutoOffsetReset.Latest
             };
 
-            dynamic customerMessage = null;
             try
             {
                 using (var consumer = new ConsumerBuilder<Null, string>(config).Build())
                 {
                     consumer.Subscribe(topic);
-                    var cr = consumer.Consume();
-                    if (cr.Message != null)
-                        customerMessage = JsonSerializer.Deserialize<CustomerModel>(cr.Message.Value);
 
-                }
-                
+                    while (!stoppingToken.IsCancellationRequested)
+                    {                        
+                        var consumedMessage = consumer.Consume();
+
+                        if (consumedMessage != null && consumedMessage.Message != null)
+                            await ProcessConsumedData(consumedMessage);
+                    }
+
+                    consumer.Close();
+                }                
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 throw;
-            }
-            
-            return customerMessage;
+            }           
+        }
+
+        private async Task ProcessConsumedData(dynamic consumedMessage)
+        {
+            var result = JsonSerializer.Deserialize<CustomerModel>(consumedMessage.Message.Value);
+            if (result != null)
+            {
+                Console.WriteLine(result.Name);
+            }           
         }
     }
 }
